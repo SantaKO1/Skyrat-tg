@@ -50,6 +50,9 @@
 	.["lobbies"] = list()
 	.["hosting"] = FALSE
 	.["admin"] = check_rights_for(user.client, R_ADMIN)
+	.["rating"] = null
+	if(user.ckey && SSdeathmatch)
+		.["rating"] = SSdeathmatch.get_player_ranking_data(user.ckey)
 	for (var/ckey in lobbies)
 		var/datum/deathmatch_lobby/lobby = lobbies[ckey]
 		if (user.ckey == ckey)

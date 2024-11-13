@@ -196,6 +196,9 @@
 	for(var/datum/deathmatch_modifier/modifier in modifiers)
 		GLOB.deathmatch_game.modifiers[modifier].on_end_game(src)
 
+	if(SSdeathmatch)
+		SSdeathmatch.update_match_stats(players)
+
 	clear_reservation()
 	GLOB.deathmatch_game.remove_lobby(host)
 	log_game("Deathmatch game [host] ended.")
@@ -610,3 +613,7 @@
 		UNTYPED_LIST_ADD(player_list, player)
 
 	return player_list
+
+/datum/deathmatch_lobby/proc/handle_kill(mob/killer, mob/victim)
+	if(SSdeathmatch && killer?.ckey && victim?.ckey)
+		SSdeathmatch.update_kill_stats(killer, victim)
