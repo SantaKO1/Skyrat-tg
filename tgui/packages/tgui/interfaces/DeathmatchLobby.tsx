@@ -24,6 +24,7 @@ type Player = {
   loadout: string;
   ready: BooleanLike;
   mob: string;
+  elo: string;
 };
 
 type Modifier = {
@@ -175,6 +176,7 @@ function PlayerColumn(props) {
                 {isHost && (
                   <Tooltip content="Host">
                     <Icon color="gold" name="star" pt={isSelf && 0.5} />
+                    <Box>ELO: {player.elo}</Box>
                   </Tooltip>
                 )}
                 {!host && isSelf && (

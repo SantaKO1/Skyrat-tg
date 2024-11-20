@@ -23,13 +23,27 @@ GLOBAL_LIST_EMPTY(deathmatch_ratings)
 	/// Last time rating was updated
 	var/last_update = 0
 
+/datum/deathmatch_ranking/ui_state(mob/user)
+	return GLOB.observer_state
+
+/datum/deathmatch_ranking/ui_interact(mob/user, datum/tgui/ui)
+	ui = SStgui.try_update_ui(user, src, null)
+	if(!ui)
+		ui = new(user, src, "DeathmatchLeaderboard")
+		ui.open()
+
+/datum/deathmatch_ranking/ui_data(mob/user)
+	. = ..()
+	.["rating"] = null
+	for (var/ckey in GLOB.player_list)
+		.["rating"] = SSdeathmatch.get_player_ranking_data(client.ckey)
+		.["name"] = user.client.ckey
+
 SUBSYSTEM_DEF(deathmatch)
 	name = "Deathmatch"
 	flags = SS_NO_FIRE
 	init_order = INIT_ORDER_PERSISTENCE
 
-	/// Whether deathmatch mode is enabled
-	var/enabled = FALSE
 	/// Minimum rating possible
 	var/min_rating = 100
 	/// Maximum rating possible
@@ -41,7 +55,6 @@ SUBSYSTEM_DEF(deathmatch)
 
 /datum/controller/subsystem/deathmatch/Initialize()
 	. = ..()
-	enabled = TRUE
 	load_ratings()
 
 /datum/controller/subsystem/deathmatch/proc/load_ratings()
@@ -136,7 +149,7 @@ SUBSYSTEM_DEF(deathmatch)
 	needs_save = FALSE
 
 /datum/controller/subsystem/deathmatch/proc/update_player_stats(mob/killer, mob/victim, is_kill = TRUE)
-	if(!enabled || !killer?.ckey || !victim?.ckey)
+	if(!killer?.ckey || !victim?.ckey)
 		return
 
 	var/datum/deathmatch_ranking/killer_rating = get_or_create_rating(killer.ckey)

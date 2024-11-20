@@ -609,6 +609,7 @@
 		var/datum/outfit/deathmatch_loadout/dm_loadout = player_info["loadout"]
 		player["loadout"] = dm_loadout::display_name
 		player["key"] = player_key
+		player["elo"] = SSdeathmatch.get_player_ranking_data(player_key)
 
 		UNTYPED_LIST_ADD(player_list, player)
 
