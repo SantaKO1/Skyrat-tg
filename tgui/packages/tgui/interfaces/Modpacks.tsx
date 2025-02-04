@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useBackend, useLocalState } from '../backend';
 import {
   Box,
+  Button,
   Collapsible,
   Input,
   LabeledList,
@@ -21,6 +22,7 @@ type Data = {
   features: Modpack[];
   translations: Modpack[];
   reverts: Modpack[];
+  is_admin: boolean;
 };
 
 type Modpack = {
@@ -29,6 +31,7 @@ type Modpack = {
   author: string;
   icon_class: string;
   id: string;
+  enabled: boolean;
 };
 
 export const Modpacks = (props) => {
@@ -72,7 +75,7 @@ export const Modpacks = (props) => {
 
 const FeaturesTable = () => {
   const { data } = useBackend<Data>();
-  const { features } = data;
+  const { features, is_admin } = data;
 
   const [searchText, setSearchText] = useLocalState('searchText', '');
 
@@ -128,35 +131,7 @@ const FeaturesTable = () => {
                       : true),
                 )
                 .map((feature) => (
-                  <Collapsible
-                    color="transparent"
-                    key={feature.name}
-                    title={<span className="color-white">{feature.name}</span>}
-                  >
-                    <Table.Row key={feature.name}>
-                      <Table.Cell collapsing>
-                        <Box m={1} className={feature.icon_class} />
-                      </Table.Cell>
-                      <Table.Cell verticalAlign="top">
-                        <Box
-                          key={feature.id}
-                          style={{
-                            borderBottom: '1px solid #888',
-                            paddingBottom: '10px',
-                            fontSize: '14px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          <LabeledList.Item label="Описание">
-                            {feature.desc}
-                          </LabeledList.Item>
-                          <LabeledList.Item label="Автор">
-                            {feature.author}
-                          </LabeledList.Item>
-                        </Box>
-                      </Table.Cell>
-                    </Table.Row>
-                  </Collapsible>
+                  <ModpackEntry key={feature.id} modpack={feature} />
                 ))}
             </Stack.Item>
           </Stack>
@@ -224,37 +199,7 @@ const TranslationsTable = () => {
                       : true),
                 )
                 .map((translate) => (
-                  <Collapsible
-                    color="transparent"
-                    key={translate.name}
-                    title={
-                      <span className="color-white">{translate.name}</span>
-                    }
-                  >
-                    <Table.Row key={translate.name}>
-                      <Table.Cell collapsing>
-                        <Box m={1} className={translate.icon_class} />
-                      </Table.Cell>
-                      <Table.Cell verticalAlign="top">
-                        <Box
-                          key={translate.id}
-                          style={{
-                            borderBottom: '1px solid #888',
-                            paddingBottom: '10px',
-                            fontSize: '14px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          <LabeledList.Item label="Описание">
-                            {translate.desc}
-                          </LabeledList.Item>
-                          <LabeledList.Item label="Автор">
-                            {translate.author}
-                          </LabeledList.Item>
-                        </Box>
-                      </Table.Cell>
-                    </Table.Row>
-                  </Collapsible>
+                  <ModpackEntry key={translate.id} modpack={translate} />
                 ))}
             </Stack.Item>
           </Stack>
@@ -322,40 +267,64 @@ const RevertsTable = () => {
                       : true),
                 )
                 .map((revert) => (
-                  <Collapsible
-                    color="transparent"
-                    key={revert.name}
-                    title={<span className="color-white">{revert.name}</span>}
-                  >
-                    <Table.Row key={revert.name}>
-                      <Table.Cell collapsing>
-                        <Box m={1} className={revert.icon_class} />
-                      </Table.Cell>
-                      <Table.Cell verticalAlign="top">
-                        <Box
-                          key={revert.id}
-                          style={{
-                            borderBottom: '1px solid #888',
-                            paddingBottom: '10px',
-                            fontSize: '14px',
-                            textAlign: 'center',
-                          }}
-                        >
-                          <LabeledList.Item label="Описание">
-                            {revert.desc}
-                          </LabeledList.Item>
-                          <LabeledList.Item label="Автор">
-                            {revert.author}
-                          </LabeledList.Item>
-                        </Box>
-                      </Table.Cell>
-                    </Table.Row>
-                  </Collapsible>
+                  <ModpackEntry key={revert.id} modpack={revert} />
                 ))}
             </Stack.Item>
           </Stack>
         </Section>
       </Stack.Item>
     </Stack>
+  );
+};
+
+const ModpackEntry = (props: { modpack: Modpack }) => {
+  const { act, data } = useBackend<Data>();
+
+  return (
+    <Collapsible
+      title={
+        <Box inline>
+          <span className="color-white">{props.modpack.name}</span>
+          {data.is_admin && (
+            <Button
+              ml={1}
+              icon={props.modpack.enabled ? 'toggle-on' : 'toggle-off'}
+              color={props.modpack.enabled ? 'good' : 'bad'}
+              tooltip="Toggle Modpack"
+              onClick={() =>
+                act('toggle_modpack', {
+                  id: props.modpack.id,
+                  enable: !props.modpack.enabled,
+                })
+              }
+            />
+          )}
+        </Box>
+      }
+    >
+      <Table.Row key={props.modpack.name}>
+        <Table.Cell collapsing>
+          <Box m={1} className={props.modpack.icon_class} />
+        </Table.Cell>
+        <Table.Cell verticalAlign="top">
+          <Box
+            key={props.modpack.id}
+            style={{
+              borderBottom: '1px solid #888',
+              paddingBottom: '10px',
+              fontSize: '14px',
+              textAlign: 'center',
+            }}
+          >
+            <LabeledList.Item label="Описание">
+              {props.modpack.desc}
+            </LabeledList.Item>
+            <LabeledList.Item label="Автор">
+              {props.modpack.author}
+            </LabeledList.Item>
+          </Box>
+        </Table.Cell>
+      </Table.Row>
+    </Collapsible>
   );
 };

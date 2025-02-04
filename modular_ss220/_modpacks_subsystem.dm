@@ -6,6 +6,7 @@ SUBSYSTEM_DEF(modpacks)
 	init_order = INIT_ORDER_MODPACKS
 	flags = SS_NO_FIRE
 	var/list/loaded_modpacks = list()
+	var/list/loaded_modpacks_assoc = list()
 
 /datum/controller/subsystem/modpacks/Initialize()
 	var/list/all_modpacks = list()
@@ -29,7 +30,19 @@ SUBSYSTEM_DEF(modpacks)
 		if(fail_msg)
 			CRASH("Modpack [(istype(package) && package.name) || "Unknown"] failed to initialize: [fail_msg]")
 
-	return SS_INIT_SUCCESS
+	//
+	for(var/datum/modpack/package as anything in loaded_modpacks)
+		loaded_modpacks_assoc[package.id] = package
+		for(var/dependency_id in package.mod_depends)
+			var/datum/modpack/dependency = loaded_modpacks_assoc[dependency_id]
+			if(dependency)
+				LAZYADD(dependency.dependents, package)
+
+	for(var/datum/modpack/package as anything in loaded_modpacks)
+		if(package.enabled)
+			package.on_enable()
+
+	return ..() | SS_INIT_SUCCESS
 
 /client/verb/modpacks_list()
 	set name = "Modpacks List"

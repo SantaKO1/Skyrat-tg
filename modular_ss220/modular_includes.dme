@@ -3,6 +3,7 @@
 #include "_assets_modpacks.dm" // modpack picture integration system
 #include "_modpack.dm" // modpack obj
 #include "_modpacks_subsystem.dm" // actually mods subsystem + tgui in "tgui/packages/tgui/interfaces/Modpacks.tsx"
+#include "_modpack_runtime.dm" //
 
 /* --FEATURE-- */
 

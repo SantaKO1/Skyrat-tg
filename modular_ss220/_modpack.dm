@@ -14,8 +14,14 @@
 	/// A list of your modpack's dependencies. If you use obj from another modpack - put it here.
 	var/list/mod_depends = list()
 
+	/* In development */
 	/// Is modpack visible,
 	var/visible = TRUE // by default set to TRUE
+	/// Whether the modpack is currently active
+	var/enabled = TRUE // by default set to TRUE (so our modpacks will be enabled by default)
+	/// List of modpacks that directly depend on this one
+	/* Explanation : mod_depends about what THIS modpack NEEDS to function, dependents about who DEPENDS ON THIS modpack */
+	var/list/dependents = list()
 
 // Modpacks initialization steps
 /datum/modpack/proc/pre_initialize() // Basic modpack fuctions
@@ -71,6 +77,7 @@
 			"author" = modpack.author,
 			"icon_class" = assets.icon_class_name("modpack-[modpack.id]"),
 			"id" = modpack.id,
+			"enabled" = modpack.enabled,
 			)
 
 		if (modpack.group == "Фичи" || modpack.group == "Features")
@@ -81,3 +88,21 @@
 			.["reverts"] += list(modpack_data)
 		else
 			CRASH("Modpack [modpack.name] has bad group name or queued for deletion.")
+
+/datum/modpack/ui_data(mob/user)
+  var/list/data = list()
+  data["is_admin"] = check_rights(R_ADMIN, FALSE, user)
+  return data
+
+/datum/modpack/ui_act(action, params, mob/user)
+    if(..())
+        return TRUE
+
+    if(action == "toggle_modpack")
+        if(!check_rights(R_ADMIN))
+            return TRUE
+        var/id = params["id"]
+        var/enable = text2num(params["enable"])
+        if(SSmodpacks.set_modpack_enabled(id, enable))
+            return TRUE
+    return FALSE
